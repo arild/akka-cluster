@@ -1,0 +1,136 @@
+<!--
+Google IO 2012/2013 HTML5 Slide Template
+
+Authors: Eric Bidelman <ebidel@gmail.com>
+         Luke Mahé <lukem@google.com>
+
+URL: https://code.google.com/p/io-2012-slides
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <!--This one seems to work all the time, but really small on ipad-->
+    <!--<meta name="viewport" content="initial-scale=0.4">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" media="all" href="theme/css/default.css">
+    <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+    <link rel="stylesheet" media="all" href="custom.css">
+    <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+    <script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+</head>
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+    <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="images/BEKK_logo.png"></aside>
+
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+        <hgroup class="auto-fadein">
+            <h1 data-config-title><!-- populated from slide_config.json --></h1>
+            <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+            <p data-config-presenter><!-- populated from slide_config.json --></p>
+        </hgroup>
+    </slide>
+
+    <slide>
+        <hgroup>
+            <h2>What is Akka?</h2>
+        </hgroup>
+        <article>
+            <img width="1000px" src="figures/akka-toolkit.png"/>
+        </article>
+    </slide>
+
+    <slide>
+        <hgroup>
+            <h2>Hello Actor</h2>
+        </hgroup>
+        <article>
+<pre class="prettyprint">import akka.actor._
+
+class GreetingActor extends Actor {
+  def receive = {
+    case message: String => println("Hello " + message)
+  }
+}
+
+object GreetingActor extends App {
+  val system = ActorSystem("MySystem")
+  val greetingActor: ActorRef = system.actorOf(Props[GreetingActor])
+  greetingActor ! "Hulk Hogan"
+}</pre>
+        </article>
+        <span class="example">GreetingActor_1.java|scala</span>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Sending Messages</h2>
+        </hgroup>
+        <article>
+    <pre class="prettyprint">import akka.actor._
+
+case class SayHello(name: String)
+
+class GreetingActor extends Actor {
+  def receive = {
+    case hello: SayHello => {
+      println("Hello " + hello.name)
+      sender ! hello.name
+    }
+  }
+}
+
+object GreetingActor extends App {
+  val greetingActor = ActorSystem("MySystem").actorOf(Props[GreetingActor])
+  greetingActor ! SayHello("Pope Benedict")
+}</pre>
+            </article>
+        <span class="example">GreetingActor_2.java|scala</span>
+    </slide>
+
+    <slide class="thank-you-slide segue nobackground">
+        <article class="flexbox vleft">
+            <h2>Questions?</h2>
+            <br><br><br>
+            <ul>
+                <li>Slides: <a href="http://arild.github.com/akka-cluster">http://arild.github.com/akka-cluster</a></span></li>
+                <li>Code: <a href="https://github.com/arild/akka-cluster">https://github.com/arild/akka-cluster</a></li>
+            </ul>
+
+        </article>
+        <p class="auto-fadein" data-config-contact>
+            <!-- populated from slide_config.json -->
+        </p>
+    </slide>
+
+
+    <slide class="backdrop"></slide>
+
+    </slides>
+
+<script>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-XXXXXXXX-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+<script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+</html>
