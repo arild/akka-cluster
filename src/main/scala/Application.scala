@@ -3,12 +3,12 @@ import akka.contrib.pattern.ClusterSingletonManager
 
 object Application extends App {
 
-  val cities = Cities(11)
-  cities.print()
+  val cities = Cities(Cities.generateDistanceMatrix(10))
+  cities.printDistanceMatrix()
 
   //println(Tsp.getSubRoutes(cities, 4))
 
-  println(Tsp.findShortestRoute(cities, Route()))
+  println(cities.findShortestRoute(Route()))
 
   val system = ActorSystem("TspSystem")
 
