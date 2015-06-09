@@ -1,25 +1,31 @@
-import akka.actor.{ActorLogging, Actor}
-import akka.actor.Actor.Receive
-import akka.cluster.Cluster
+import akka.actor.{Actor, ActorLogging}
 import akka.cluster.ClusterEvent._
-import akka.actor.ActorLogging
-import akka.actor.Actor
+import akka.cluster.{Cluster, Member}
+
+import scala.collection.mutable
 
 class Worker extends Actor with ActorLogging {
-
   val cluster = Cluster(context.system)
+  val members = mutable.TreeSet[Member]()(Ordering.fromLessThan[Member](_.isOlderThan(_)))
+  var cities: Cities = null
 
   override def preStart() = {
     log.info("Worker starting")
-    cluster.subscribe(self, initialStateMode = InitialStateAsEvents,
-      classOf[MemberEvent])
+    cluster.subscribe(self, initialStateMode = InitialStateAsEvents, classOf[MemberEvent])
   }
 
   override def receive: Receive = {
-    case MemberUp(member) =>
-      log.info("Member is Up: {}", member.address)
-    case MemberRemoved(member, previousStatus) =>
-      log.info("Member is Removed: {} after {}",
-        member.address, previousStatus)
+    case MemberUp(member) => members.add(member)
+    case MemberRemoved(member, previousStatus) => members.remove(member)
+    case cities: Cities => {
+      log.info("Received cities")
+      this.cities = cities
+      sender() ! GetSubRoute()
+    }
+    case subRoute: Route => {
+      log.info("Received route {}", subRoute)
+      sender() ! cities.findShortestRoute(subRoute)
+      sender() ! GetSubRoute()
+    }
   }
 }
