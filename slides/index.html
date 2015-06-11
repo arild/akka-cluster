@@ -48,6 +48,18 @@ URL: https://code.google.com/p/io-2012-slides
     </slide>
 
     <slide>
+        <hgroup><h2>The Actor Model</h2></hgroup>
+        <article>
+            <ul>
+                <li>Actors sends messages <b>asynchronously</b></li>
+                <li>Actors process messages <b>sequentially</b></li>
+            </ul>
+            <br />
+            <img src="figures/actor-model.png" style="max-height: 400px;" />
+        </article>
+    </slide>
+
+    <slide>
         <hgroup>
             <h2>Hello Actor</h2>
         </hgroup>
@@ -66,7 +78,6 @@ object GreetingActor extends App {
   greetingActor ! "Hulk Hogan"
 }</pre>
         </article>
-        <span class="example">GreetingActor_1.java|scala</span>
     </slide>
 
 
@@ -93,8 +104,79 @@ object GreetingActor extends App {
   greetingActor ! SayHello("Pope Benedict")
 }</pre>
             </article>
-        <span class="example">GreetingActor_2.java|scala</span>
     </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Cluster Membership</h2>
+        </hgroup>
+        <article><pre class="prettyprint">class ClusterActor extends Actor {
+
+  Cluster(context.system)
+    .subscribe(self, initialStateMode = InitialStateAsEvents, classOf[MemberEvent])
+
+  def receive = {
+    case MemberUp(member) => {
+      log.info("Member is Up: {}", member.address)
+    }
+    case MemberRemoved(member, previousStatus) => {
+      log.info("Member is Removed: {} after {}", member.address, previousStatus)
+    }
+  }
+}
+</pre>
+        </article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Cluster Membership</h2>
+        </hgroup>
+        <article><pre class="prettyprint">class ClusterActor extends Actor {
+  val members = mutable.Set[Member]()
+
+  Cluster(context.system)
+    .subscribe(self, initialStateMode = InitialStateAsEvents, classOf[MemberEvent])
+
+  def receive = {
+    case MemberUp(member) => {
+      members.add(member)
+      if (member.hasRole("backend")) {
+        val path: ActorPath = RootActorPath(member.address) / "user" / "worker"
+        context.actorSelection(path) ! "hello"
+      }
+    }
+    case MemberRemoved(member, previousStatus) => members.remove(member)
+  }
+}</pre></article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Cluster Membership</h2>
+        </hgroup>
+        <article><pre class="prettyprint">akka {
+  remote.netty.tcp {
+    hostname = "127.0.0.1"
+    port = 8000
+  }
+  cluster {
+    seed-nodes = [
+      "akka.tcp://MySystem@127.0.0.1:8000",
+      "akka.tcp://MySystem@127.0.0.1:8001"
+    ]
+    auto-down-unreachable-after = 10s
+  }
+  actor {
+    provider = "akka.cluster.ClusterActorRefProvider"
+  }
+  extensions = ["akka.contrib.pattern.DistributedPubSubExtension"]
+}</pre></article>
+    </slide>
+
 
     <slide class="thank-you-slide segue nobackground">
         <article class="flexbox vleft">
