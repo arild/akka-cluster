@@ -60,31 +60,10 @@ URL: https://code.google.com/p/io-2012-slides
         </article>
     </slide>
 
+
     <slide>
         <hgroup>
             <h2>Hello Actor</h2>
-        </hgroup>
-        <article>
-<pre class="prettyprint">import akka.actor._
-
-class GreetingActor extends Actor {
-  def receive = {
-    case message: String => println("Hello " + message)
-  }
-}
-
-object GreetingActor extends App {
-  val system = ActorSystem("MySystem")
-  val greetingActor: ActorRef = system.actorOf(Props[GreetingActor])
-  greetingActor ! "Hulk Hogan"
-}</pre>
-        </article>
-    </slide>
-
-
-    <slide>
-        <hgroup>
-            <h2>Sending Messages</h2>
         </hgroup>
         <article>
     <pre class="prettyprint">import akka.actor._
@@ -94,8 +73,7 @@ case class SayHello(name: String)
 class GreetingActor extends Actor {
   def receive = {
     case hello: SayHello => {
-      println("Hello " + hello.name)
-      sender ! hello.name
+      sender ! "Hello " + hello.name
     }
   }
 }
@@ -105,6 +83,21 @@ object GreetingActor extends App {
   greetingActor ! SayHello("Pope Benedict")
 }</pre>
             </article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Akka Cluster - Features</h2>
+        </hgroup>
+        <article>
+            <ul>
+                <li><b>Cluster membership</b>. Location transparent & failure detector.</li>
+                <li><b>Most features of akka-actor</b></li>
+                <li><b>Sane abstraction level</b></li>
+                <li><b>Extensions</b>. Cluster singleton, pub-sub, cluster sharding, and more.</li>
+            </ul>
+        </article>
     </slide>
 
 
@@ -157,7 +150,7 @@ object GreetingActor extends App {
 
     <slide>
         <hgroup>
-            <h2>Cluster Membership</h2>
+            <h2>Cluster Config</h2>
         </hgroup>
         <article><pre class="prettyprint">akka {
   remote.netty.tcp {
@@ -169,6 +162,7 @@ object GreetingActor extends App {
       "akka.tcp://MySystem@127.0.0.1:8000",
       "akka.tcp://MySystem@127.0.0.1:8001"
     ]
+    roles = ["backend"]
     auto-down-unreachable-after = 10s
   }
   actor {
@@ -176,6 +170,70 @@ object GreetingActor extends App {
   }
   extensions = ["akka.contrib.pattern.DistributedPubSubExtension"]
 }</pre></article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Pub-sub Extension</h2>
+        </hgroup>
+        <article>
+    <pre class="prettyprint">class Subscriber extends Actor {
+  val mediator = DistributedPubSubExtension(context.system).mediator
+  mediator ! Subscribe("content", self)
+
+  def receive = {
+    case s: String => log.info(s)
+  }
+}
+
+class Publisher extends Actor {
+  val mediator = DistributedPubSubExtension(context.system).mediator
+  mediator ! Publish("content", "hello")
+
+  def receive = { case _ => }
+}</pre>
+        </article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Cluster Singleton Extension</h2>
+        </hgroup>
+        <article>
+    <pre class="prettyprint">  system.actorOf(ClusterSingletonManager.props(
+    singletonProps = Props(classOf[Consumer]),
+    singletonName = "consumer",
+    terminationMessage = End,
+    role = Some("worker")),
+    name = "singleton")</pre>
+        </article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>When to use Akka?</h2>
+        </hgroup>
+        <article>
+            <p class="flexbox vcenter">
+                <img src="images/measurement_station.png" style="max-height: 480px" />
+                <a href="http://www.tu.no/it/2014/06/19/vegvesenet-skal-hoste-10.000-datameldinger-om-trafikken-hvert-sekund-hele-aret">Vegvesenet skal høste 10.000 datameldinger om trafikken hvert sekund hele året</a>
+            </p>
+        </article>
+    </slide>
+
+
+    <slide>
+        <hgroup>
+            <h2>Datainn - Where does Akka fit in?</h2>
+        </hgroup>
+        <article>
+            <p class="flexbox vcenter">
+                <img src="figures/datainn-architecture.png" style="max-height: 530px" />
+            </p>
+        </article>
     </slide>
 
 

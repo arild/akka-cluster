@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 case class GetSubRoute()
 
-class Master() extends Actor with ActorLogging {
+class Master extends Actor with ActorLogging {
   val members = mutable.Set[Member]()
   val cluster = Cluster(context.system)
   val cities = Cities(Cities.generateDistanceMatrix(numCities = 11))
