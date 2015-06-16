@@ -38,12 +38,23 @@ URL: https://code.google.com/p/io-2012-slides
         </hgroup>
     </slide>
 
+    <slide class="segue dark quote nobackground">
+        <article class="flexbox vleft auto-fadein">
+            <q>
+                Build powerful concurrent & distributed applications
+                <b>more easily</b>.
+            </q>
+            <br><br>
+            <p class="quoteLink">
+                <a href="http://akka.io/">http://akka.io/</a>
+            </p>
+        </article>
+    </slide>
+
     <slide>
-        <hgroup>
-            <h2>What is Akka?</h2>
-        </hgroup>
+        <br><br><br>
         <article>
-	    <br>
+            <br>
             <img src="figures/akka-toolkit.png"/>
         </article>
     </slide>
@@ -60,27 +71,22 @@ URL: https://code.google.com/p/io-2012-slides
         </article>
     </slide>
 
-
     <slide>
         <hgroup>
             <h2>Hello Actor</h2>
         </hgroup>
         <article>
-    <pre class="prettyprint">import akka.actor._
-
-case class SayHello(name: String)
-
-class GreetingActor extends Actor {
+    <pre class="prettyprint">class GreetingActor extends Actor {
   def receive = {
-    case hello: SayHello => {
-      sender ! "Hello " + hello.name
+    case name: String => {
+      sender ! "Hello " + name
     }
   }
 }
 
 object GreetingActor extends App {
   val greetingActor = ActorSystem("MySystem").actorOf(Props[GreetingActor])
-  greetingActor ! SayHello("Pope Benedict")
+  greetingActor ! "Hello"
 }</pre>
             </article>
     </slide>
@@ -93,9 +99,9 @@ object GreetingActor extends App {
         <article>
             <ul>
                 <li><b>Cluster membership</b>. Location transparent & failure detector.</li>
-                <li><b>Most features of akka-actor</b></li>
-                <li><b>Sane abstraction level</b></li>
-                <li><b>Extensions</b>. Cluster singleton, pub-sub, cluster sharding, and more.</li>
+                <li><b>Extensions</b>. Cluster singleton, pub-sub, and more.</li>
+                <li><b>Distribution first</b>. No extra step for distribution.</li>
+                <li><b>Sane abstraction level</b>. Doesn't hide too much.</li>
             </ul>
         </article>
     </slide>
@@ -163,10 +169,6 @@ object GreetingActor extends App {
       "akka.tcp://MySystem@127.0.0.1:8001"
     ]
     roles = ["backend"]
-    auto-down-unreachable-after = 10s
-  }
-  actor {
-    provider = "akka.cluster.ClusterActorRefProvider"
   }
   extensions = ["akka.contrib.pattern.DistributedPubSubExtension"]
 }</pre></article>
@@ -195,22 +197,6 @@ class Publisher extends Actor {
 }</pre>
         </article>
     </slide>
-
-
-    <slide>
-        <hgroup>
-            <h2>Cluster Singleton Extension</h2>
-        </hgroup>
-        <article>
-    <pre class="prettyprint">  system.actorOf(ClusterSingletonManager.props(
-    singletonProps = Props(classOf[Consumer]),
-    singletonName = "consumer",
-    terminationMessage = End,
-    role = Some("worker")),
-    name = "singleton")</pre>
-        </article>
-    </slide>
-
 
     <slide>
         <hgroup>
@@ -242,8 +228,9 @@ class Publisher extends Actor {
             <h2>Questions?</h2>
             <br><br><br>
             <ul>
-                <li>Slides: <a href="http://arild.github.com/akka-cluster">http://arild.github.com/akka-cluster</a></span></li>
-                <li>Code: <a href="https://github.com/arild/akka-cluster">https://github.com/arild/akka-cluster</a></li>
+                <li>Akka docs: <a href="http://akka.io/docs/">http://akka.io/docs/</a></li>
+                <li>Slides: <a href="http://arild.github.com/akka-cluster">http://arild.github.com/akka-cluster</a></li>
+                <li><img width="200px" src="images/akka-concurrency.jpeg"/></li>
             </ul>
 
         </article>

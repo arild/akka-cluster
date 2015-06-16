@@ -2,7 +2,7 @@ var SLIDE_CONFIG = {
   // Slide settings
   settings: {
     title: 'Akka Cluster',
-    subtitle: '',
+    subtitle: 'Distributed systems for the masses',
     //eventInfo: {
     //  title: 'Google I/O',
     //  date: '6/x/2013'
